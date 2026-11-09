@@ -1,17 +1,18 @@
 # 쇼핑몰 장바구니 & 할인 쿠폰 프로젝트
+import time
 
-# 판매 상품 데이터
-items_list = [
+class MainMenu:
+
+    items_list = [
     ["무선 이어폰", 89_000, 3],
     ["텀블러", 15_000, 10],
     ["보조배터리", 32_000, 5],
     ["마우스패드", 9_000, 0],
     ["USB 허브", 18_000, 4]
-]
-
-class Items:
+    ]
+    
     def __init__(self, items_list):
-        self.items_list = items_list
+        #self.items_list = items_list
         self.cart = []
         self.total_discount = 0
         self.coupon_status = 0
@@ -23,6 +24,10 @@ class Items:
 
         pick = input("원하시는 번호를 입력해주세요. : ")
         return int(pick)
+
+class Run(MainMenu):
+    def __init__(self, items_list):
+        super().__init__(items_list)
 
     def pick_menu(self, pick):
         if pick == 1: # 상품목록
@@ -55,7 +60,7 @@ class Items:
             
 
     def list(self, pick):
-        for i, index in enumerate(self.items_list, start=1):
+        for i, index in enumerate(MainMenu.items_list, start=1):
             if index[2] == 0:
                 print(f"{i}. 제품: {index[0]}, 가격: {index[1]}, 수량: 품절")
             else:
@@ -66,18 +71,18 @@ class Items:
         if add_item == 0:
             back = i.menu()
             return back
-        add_qty = int(input(f"\n선택한 상품: '{self.items_list[add_item - 1][0]}', 수량을 선택해 주세요. : "))
-        if self.items_list[add_item - 1][2] < add_qty:
-            print(f"\n현재 재고가 부족합니다. (담을수 있는 수량: {self.items_list[add_item - 1][2]}개.)")
+        add_qty = int(input(f"\n선택한 상품: '{MainMenu.items_list[add_item - 1][0]}', 수량을 선택해 주세요. : "))
+        if MainMenu.items_list[add_item - 1][2] < add_qty:
+            print(f"\n현재 재고가 부족합니다. (담을수 있는 수량: {MainMenu.items_list[add_item - 1][2]}개.)")
             again = i.add(pick)
             pick = again
         else:
-            print(f"\n{self.items_list[add_item - 1][0]}을/를 {add_qty}개 담았습니다.")
-            self.items_list[add_item - 1][2] -= add_qty
-            print(f"\n{self.items_list[add_item - 1][0]}의 현재 수량: {self.items_list[add_item - 1][2]}개.")
+            print(f"\n{MainMenu.items_list[add_item - 1][0]}을/를 {add_qty}개 담았습니다.")
+            MainMenu.items_list[add_item - 1][2] -= add_qty
+            print(f"\n{MainMenu.items_list[add_item - 1][0]}의 현재 수량: {MainMenu.items_list[add_item - 1][2]}개.")
 
-            prices = self.items_list[add_item - 1][1] * add_qty
-            self.cart.append([self.items_list[add_item - 1][0], prices, add_qty])
+            prices = MainMenu.items_list[add_item - 1][1] * add_qty
+            self.cart.append([MainMenu.items_list[add_item - 1][0], prices, add_qty])
 
     def subtract(self, pick):
         for k, index in enumerate(self.cart, start=1):
@@ -157,11 +162,43 @@ class Items:
         self.coupon_name
 
     def pay(self):
-        pass
+        package_option = int(input("배송방식을 선택해주세요. 1.택배 배송 / 2.방문 수령 : "))
+        time.sleep(1.5)
+        print(f"{total_price - self.total_discount}원이 정상적으로 결제되었습니다.")
+
+        total_price = 0
+        print(f"\n===영수증===")
+
+        print("-"*58)
+        for j, info in enumerate(self.cart, start=1):
+            print(f"{j}. {info[0]},   x{info[2]}.             {info[1]}원")
+            total_price += info[1]
+        print("-"*58)
+        print(f"상품 합계                                    {total_price}원\n")
+        if self.total_discount > 0:
+            print(f"할인                           -{self.total_discount}원 [{i.coupon_name}]\n")
+        else:
+            print(f"할인                            {self.total_discount}원\n")
+        if total_price - self.total_discount > 30_000 and package_option == 1:
+            shipping_fee = 0
+            print(f"배송비                                  {shipping_fee}원 [30,000원 이상 배송비 무료]\n")
+        elif total_price - self.total_discount < 30_000 and package_option == 1:
+            shipping_fee = 3_000
+            print(f"배송비                                  {shipping_fee}원\n") 
+        elif package_option == 2:
+            shipping_fee = 0
+            print(f"배송비                                  {shipping_fee}원 [방문 수령]\n") 
+
+        if shipping_fee:
+            print(f"결제 금액              {total_price - self.total_discount + shipping_fee}원")
+        else:
+            print(f"결제 금액              {total_price - self.total_discount}원")
+
+        print("-"*58)
         
 
 if __name__ == "__main__":
-    i = Items(items_list)
+    i = Run(MainMenu.items_list)
     while True:
         pick =i.menu()
         if pick == "q":
